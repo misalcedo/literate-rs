@@ -1,6 +1,13 @@
 # literate-rs
 A [literate programming](https://en.wikipedia.org/wiki/Literate_programming) tool that allows writing code in your Markdown files.
 
+## Badges
+[![Build](https://github.com/misalcedo/literate/actions/workflows/compatibility.yml/badge.svg)](https://github.com/misalcedo/literate/actions/workflows/compatibility.yml)
+[![License](https://img.shields.io/badge/License-Apache%202.0-yellowgreen.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Crates.io Version](https://img.shields.io/crates/v/literate.svg)](https://crates.io/crates/literate)
+[![Docs.rs Version](https://docs.rs/literate/badge.svg)](https://docs.rs/literate)
+
+
 ## How it works
 At its core `literate` reads a file from standard in and outputs code blocks to standard out as a single stream.
 The code blocks may be filtered by various qualities such as language, attributes, etc.
