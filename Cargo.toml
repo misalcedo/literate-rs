@@ -1,5 +1,6 @@
 [package]
 name = "literate"
+description = "A literate programming tool that extracts code written in your Markdown files."
 version = "0.1.0"
 authors = ["Miguel D. Salcedo <miguel@salcedo.cc>"]
 edition = "2021"
@@ -18,8 +19,11 @@ lto = true
 debug = true
 
 [features]
-cli = ["clap"]
+cli = ["anyhow", "clap", "tracing-subscriber"]
 
 [dependencies]
+anyhow = { version = "1.0", optional = true }
 clap = { version = "3.0", features = ["derive"], optional = true }
 pulldown-cmark = "0.9"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", optional = true }
