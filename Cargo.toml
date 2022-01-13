@@ -19,6 +19,7 @@ lto = true
 debug = true
 
 [features]
+default = []
 cli = ["anyhow", "clap", "tracing-subscriber"]
 
 [dependencies]
