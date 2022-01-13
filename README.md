@@ -13,3 +13,8 @@ However, one can easily envision a tool that flips Rust's documentation on its h
 Instead of doc comments, Rust source could be defined as Markdown files.
 During build, the file could be parsed to add the surrounding text as a doc comment to the code block code.
 User's could plug in different strategies for traversing up the tree to find the relevant documentation.
+
+## Testing
+```console
+cat .\examples\tortuga.ta.md | literate --language tortuga --required
+```
