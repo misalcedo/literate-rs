@@ -1,0 +1,72 @@
+name: Upload Artifacts
+
+on:
+  release:
+    types: [created, published]
+  workflow_dispatch: {}
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  release:
+    name: Upload artifacts to release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [linux, macos, windows]
+        include:
+          - build: linux
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - build: macos
+            os: macos-latest
+            target: x86_64-apple-darwin
+          - build: windows
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v1.3.0
+      - name: Install musl-tools
+        if: ${{ matrix.build == 'linux' }}
+        run: sudo apt-get update && sudo apt-get install musl-tools -y
+      - name: Build binary
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --bin literate --release --all-features --target ${{ matrix.target }}
+      - name: Upload artifacts
+        env:
+          BUILD: ${{ matrix.build }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET: ${{ matrix.target }}
+          DIR: target/${{ matrix.target }}/release
+          FILE: literate
+        shell: bash
+        run: |
+          TAG=v$(cargo metadata --no-deps --quiet | jq -r '.packages[0] | .version')
+          ASSET="$FILE-$TAG-$TARGET"
+          
+          pushd $DIR
+
+          if [ "$BUILD" = "windows" ]
+          then
+            FILE=$FILE.exe
+            ASSET=$ASSET.zip
+
+            7z a $ASSET $FILE
+          else
+            ASSET=$ASSET.tar.gz
+
+            tar czf $ASSET $FILE
+          fi
+
+          popd
+          gh release upload $TAG "$DIR/$ASSET" --clobber
