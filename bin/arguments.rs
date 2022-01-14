@@ -1,11 +1,5 @@
 use clap::{AppSettings, Parser, Subcommand};
-use lazy_static::lazy_static;
-use regex::Regex;
-use std::ops::Deref;
-
-lazy_static! {
-    static ref NON_EMPTY: Regex = Regex::new(r"^[^\s].*$").expect("Invalid regular expression.");
-}
+use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 #[clap(author, version, about)]
@@ -21,11 +15,13 @@ pub struct Arguments {
     /// The sub-command to execute.
     #[clap(subcommand)]
     pub command: Option<Commands>,
-    #[clap(
-    short,
-    long,
-    validator_regex(NON_EMPTY.deref(), "must not be empty or start with blank space")
-    )]
+    /// The input stream to read Markdown from. Defaults to STDIN.
+    #[clap(short, long)]
+    pub input: Option<PathBuf>,
+    /// The output stream to write matching fenced code block contents to. Defaults to STDOUT.
+    #[clap(short, long)]
+    pub output: Option<PathBuf>,
+    #[clap(short, long)]
     /// The language that the fenced code blocks must match to be included in the output.
     pub language: Option<String>,
     #[clap(short, long, requires("language"))]

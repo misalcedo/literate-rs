@@ -44,5 +44,5 @@ jobs:
           path: |
             ./target/release/literate
             ./target/release/literate.exe
-          if-no-files-found: error
+          if-no-files-found: ignore
           retention-days: 0
