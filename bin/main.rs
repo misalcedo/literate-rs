@@ -1,7 +1,8 @@
 use anyhow::Result;
 use arguments::Arguments;
 use literate::{CodeMatcher, LanguageMatcher};
-use std::io::{stdin, stdout};
+use std::fs::{File, OpenOptions};
+use std::io::{stdin, stdout, Read, Write};
 use tracing::{subscriber::set_global_default, Level};
 
 mod arguments;
@@ -35,7 +36,24 @@ fn run_subcommand(arguments: Arguments) -> Result<()> {
                 _ => Box::new(!arguments.required),
             };
 
-            literate::extract(stdin(), stdout(), &*matcher)?;
+            let input: Box<dyn Read> = match arguments.input {
+                None => Box::new(stdin()),
+                Some(path) => Box::new(File::open(path)?),
+            };
+
+            let output: Box<dyn Write> = match arguments.output {
+                None => Box::new(stdout()),
+                Some(path) => Box::new(
+                    OpenOptions::new()
+                        .write(true)
+                        .create(true)
+                        .truncate(true)
+                        .create_new(!arguments.overwrite)
+                        .open(path)?,
+                ),
+            };
+
+            literate::extract(input, output, matcher)?;
 
             Ok(())
         }

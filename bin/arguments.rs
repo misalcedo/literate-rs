@@ -19,8 +19,12 @@ pub struct Arguments {
     #[clap(short, long)]
     pub input: Option<PathBuf>,
     /// The output stream to write matching fenced code block contents to. Defaults to STDOUT.
+    /// The directory path to the file must already exist.
     #[clap(short, long)]
     pub output: Option<PathBuf>,
+    /// Overwrite the existing contents in the output stream.
+    #[clap(long, requires("output"))]
+    pub overwrite: bool,
     #[clap(short, long)]
     /// The language that the fenced code blocks must match to be included in the output.
     pub language: Option<String>,

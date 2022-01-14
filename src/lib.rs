@@ -14,10 +14,10 @@ const MINIMUM_CAPACITY: usize = 1024;
 /// If the matcher returns [`true`] for the language, the contents of the code block are written to the output.
 /// Otherwise, the contents are ignored.
 /// If the language of the fenced code block is blank (empty or blank space), the matcher will get [`None`] as the language.
-pub fn extract<Input: Read, Output: Write, Matcher: ?Sized + CodeMatcher>(
+pub fn extract<Input: Read, Output: Write, Matcher: CodeMatcher>(
     input: Input,
     mut output: Output,
-    matcher: &Matcher,
+    matcher: Matcher,
 ) -> Result<usize, LiterateError> {
     let mut buffer = BufReader::new(input);
     let mut contents = String::with_capacity(MINIMUM_CAPACITY);
