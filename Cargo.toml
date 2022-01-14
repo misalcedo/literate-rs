@@ -9,6 +9,10 @@ homepage = "https://github.com/misalcedo/literate-rs"
 repository = "https://github.com/misalcedo/literate-rs"
 documentation = "https://docs.rs/literate"
 
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
 [[bin]]
 name = "literate"
 path = "bin/main.rs"

@@ -1,3 +1,5 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 use pulldown_cmark::{CodeBlockKind, Event, Options, Parser, Tag};
 use std::io::{BufReader, Read, Write};
 use tracing::trace;
