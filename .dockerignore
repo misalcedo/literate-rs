@@ -1,0 +1,8 @@
+benches/
+docs/
+examples/
+target/
+.cargo/
+.github/
+*.md
+LICENSE
