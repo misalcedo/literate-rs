@@ -81,7 +81,7 @@
 </pre><pre class="rust"><code><span class="kw">mod</span> <span class="ident">filter</span>;
 <span class="kw">mod</span> <span class="ident">mapper</span>;
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">extract</span>, <span class="ident">CodeMatcher</span>, <span class="ident">LiterateError</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">CodeMatcher</span>, <span class="ident">LiterateError</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">filter::FileFilter</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mapper::PathMapper</span>;
 <span class="kw">use</span> <span class="ident">std::fs</span>::{<span class="ident">create_dir_all</span>, <span class="ident">File</span>};
@@ -93,7 +93,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Returns the number of extracted files.</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;walk&quot;</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">walk_extract</span><span class="op">&lt;</span><span class="ident">Input</span>, <span class="ident">Filter</span>, <span class="ident">Matcher</span>, <span class="ident">Mapper</span><span class="op">&gt;</span>(
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract</span><span class="op">&lt;</span><span class="ident">Input</span>, <span class="ident">Filter</span>, <span class="ident">Matcher</span>, <span class="ident">Mapper</span><span class="op">&gt;</span>(
     <span class="ident">input</span>: <span class="ident">Input</span>,
     <span class="ident">filter</span>: <span class="ident">Filter</span>,
     <span class="ident">mapper</span>: <span class="ident">Mapper</span>,
@@ -134,7 +134,7 @@
             .<span class="ident">create_new</span>(<span class="op">!</span><span class="ident">overwrite</span>)
             .<span class="ident">open</span>(<span class="ident">path</span>)<span class="question-mark">?</span>;
 
-        <span class="ident">extract</span>(<span class="ident">input</span>, <span class="ident">output</span>, <span class="kw-2">&amp;</span><span class="ident">matcher</span>)<span class="question-mark">?</span>;
+        <span class="ident"><span class="kw">crate</span>::extract</span>(<span class="ident">input</span>, <span class="ident">output</span>, <span class="kw-2">&amp;</span><span class="ident">matcher</span>)<span class="question-mark">?</span>;
 
         <span class="ident">files</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
     }

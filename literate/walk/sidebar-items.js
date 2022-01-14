@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["extract","Walks a the directory tree and [`extract`]s matching files. The resulting content is written to the mapped filename."]],"trait":[["FileFilter","Determines whether a file will be included in the directory tree walking extraction or not."],["PathMapper","Determines the output path of the contents extracted from an input file."]]});
