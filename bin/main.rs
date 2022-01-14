@@ -1,42 +1,17 @@
 use anyhow::Result;
-use clap::{AppSettings, Parser};
-use literate::LanguageMatcher;
-use std::io::{stdin, stdout};
+use arguments::Arguments;
+use literate::{CodeMatcher, LanguageMatcher};
+use std::fs::{File, OpenOptions};
+use std::io::{stdin, stdout, Read, Write};
 use tracing::{subscriber::set_global_default, Level};
 
-#[derive(Debug, Parser)]
-#[clap(author, version, about)]
-#[clap(global_setting(AppSettings::PropagateVersion))]
-#[clap(global_setting(AppSettings::InferLongArgs))]
-#[clap(global_setting(AppSettings::InferSubcommands))]
-#[clap(global_setting(AppSettings::UseLongFormatForHelpSubcommand))]
-struct Arguments {
-    #[clap(short, long, parse(from_occurrences))]
-    /// Make the subcommand more talkative.
-    verbose: usize,
-    #[clap(short, long)]
-    /// The language that the fenced code blocks must match to be included in the output.
-    language: Option<String>,
-    #[clap(short, long, requires("language"))]
-    /// Require fenced code blocks have a language to be included in the output.
-    required: bool,
-}
+mod arguments;
 
 fn main() -> Result<()> {
-    let arguments = Arguments::parse();
+    let arguments = Arguments::from_args();
 
     set_verbosity(arguments.verbose)?;
-
-    match arguments.language {
-        Some(language) => literate::extract(
-            stdin(),
-            stdout(),
-            LanguageMatcher::new(language.as_str(), arguments.required),
-        )?,
-        None => literate::extract(stdin(), stdout(), !arguments.required)?,
-    };
-
-    Ok(())
+    run_subcommand(arguments)
 }
 
 fn set_verbosity(occurrences: usize) -> Result<()> {
@@ -51,4 +26,37 @@ fn set_verbosity(occurrences: usize) -> Result<()> {
     let collector = tracing_subscriber::fmt().with_max_level(level).finish();
 
     Ok(set_global_default(collector)?)
+}
+
+fn run_subcommand(arguments: Arguments) -> Result<()> {
+    match arguments.command {
+        None => {
+            let matcher: Box<dyn CodeMatcher> = match arguments.language {
+                Some(language) => Box::new(LanguageMatcher::new(language, arguments.required)),
+                _ => Box::new(!arguments.required),
+            };
+
+            let input: Box<dyn Read> = match arguments.input {
+                None => Box::new(stdin()),
+                Some(path) => Box::new(File::open(path)?),
+            };
+
+            let output: Box<dyn Write> = match arguments.output {
+                None => Box::new(stdout()),
+                Some(path) => Box::new(
+                    OpenOptions::new()
+                        .write(true)
+                        .create(true)
+                        .truncate(true)
+                        .create_new(!arguments.overwrite)
+                        .open(path)?,
+                ),
+            };
+
+            literate::extract(input, output, matcher)?;
+
+            Ok(())
+        }
+        _ => Ok(()),
+    }
 }

@@ -6,6 +6,12 @@ pub trait CodeMatcher {
     fn matches(&self, language: Option<&str>) -> bool;
 }
 
+impl<Matcher: CodeMatcher + ?Sized> CodeMatcher for Box<Matcher> {
+    fn matches(&self, language: Option<&str>) -> bool {
+        (**self).matches(language)
+    }
+}
+
 impl CodeMatcher for bool {
     fn matches(&self, _: Option<&str>) -> bool {
         *self
@@ -32,15 +38,15 @@ impl CodeMatcher for Option<&str> {
 
 /// Matches the fenced code block against an [`Option`]al language.
 /// Exposes control over whether to include fenced code blocks without a language in the output.  
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
-pub struct LanguageMatcher<'a> {
-    pub language: &'a str,
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct LanguageMatcher {
+    pub language: String,
     pub required: bool,
 }
 
-impl Display for LanguageMatcher<'_> {
+impl Display for LanguageMatcher {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(self.language)?;
+        f.write_str(self.language.as_str())?;
 
         if !self.required {
             f.write_char('?')?;
@@ -50,14 +56,14 @@ impl Display for LanguageMatcher<'_> {
     }
 }
 
-impl<'a> LanguageMatcher<'a> {
+impl LanguageMatcher {
     /// Creates a new [`LanguageMatcher`].
-    pub fn new(language: &'a str, required: bool) -> Self {
+    pub fn new(language: String, required: bool) -> Self {
         LanguageMatcher { language, required }
     }
 }
 
-impl CodeMatcher for LanguageMatcher<'_> {
+impl CodeMatcher for LanguageMatcher {
     fn matches(&self, language: Option<&str>) -> bool {
         match language {
             Some(actual) => actual == self.language,
