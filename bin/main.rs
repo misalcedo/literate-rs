@@ -1,7 +1,7 @@
 use anyhow::Result;
 use arguments::Arguments;
 use literate::{CodeMatcher, LanguageMatcher};
-use std::fs::{File, OpenOptions};
+use std::fs::File;
 use std::io::{stdin, stdout, Read, Write};
 use tracing::{subscriber::set_global_default, Level};
 
@@ -44,7 +44,7 @@ fn run_subcommand(arguments: Arguments) -> Result<()> {
             let output: Box<dyn Write> = match arguments.output {
                 None => Box::new(stdout()),
                 Some(path) => Box::new(
-                    OpenOptions::new()
+                    File::options()
                         .write(true)
                         .create(true)
                         .truncate(true)
