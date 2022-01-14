@@ -13,6 +13,12 @@ impl<Filter: FileFilter + ?Sized> FileFilter for Box<Filter> {
     }
 }
 
+impl<Filter: FileFilter + ?Sized> FileFilter for &Filter {
+    fn filter_file(&self, file: impl AsRef<Path>) -> bool {
+        (*self).filter_file(file)
+    }
+}
+
 fn is_hidden(file: impl AsRef<Path>) -> bool {
     file.as_ref()
         .file_name()

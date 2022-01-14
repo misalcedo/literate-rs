@@ -1,9 +1,10 @@
+use crate::arguments::Commands;
 use anyhow::Result;
 use arguments::Arguments;
 use literate::{CodeMatcher, LanguageMatcher};
 use std::fs::File;
 use std::io::{stdin, stdout, Read, Write};
-use tracing::{subscriber::set_global_default, Level};
+use tracing::{info, subscriber::set_global_default, Level};
 
 mod arguments;
 
@@ -57,6 +58,23 @@ fn run_subcommand(arguments: Arguments) -> Result<()> {
 
             Ok(())
         }
-        _ => Ok(()),
+        Some(Commands::Walk(command)) => {
+            let matcher: Box<dyn CodeMatcher> = match command.language {
+                Some(language) => Box::new(LanguageMatcher::new(language, command.required)),
+                _ => Box::new(!command.required),
+            };
+
+            let files = literate::walk_extract(
+                command.input.canonicalize()?,
+                command.extension.as_str(),
+                command.output,
+                matcher,
+                command.overwrite,
+            )?;
+
+            info!("Extracted {files} into the output directory.");
+
+            Ok(())
+        }
     }
 }

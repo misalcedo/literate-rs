@@ -12,6 +12,12 @@ impl<Mapper: PathMapper + ?Sized> PathMapper for Box<Mapper> {
     }
 }
 
+impl<Mapper: PathMapper + ?Sized> PathMapper for &Mapper {
+    fn map_path(&self, file: impl AsRef<Path>) -> PathBuf {
+        (*self).map_path(file)
+    }
+}
+
 impl PathMapper for PathBuf {
     fn map_path(&self, file: impl AsRef<Path>) -> PathBuf {
         self.join(file.as_ref().with_extension(""))
