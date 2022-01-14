@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 
 /// Determines the output path of the contents extracted from an input file.
+#[cfg_attr(docsrs, doc(cfg(feature = "walk")))]
 pub trait PathMapper {
     /// Maps the extracted file's path relative to the input path to an output path.
     fn map_path(&self, file: impl AsRef<Path>) -> PathBuf;

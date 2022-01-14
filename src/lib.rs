@@ -1,3 +1,5 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 use pulldown_cmark::{CodeBlockKind, Event, Options, Parser, Tag};
 use std::io::{BufReader, Read, Write};
 use tracing::trace;
@@ -6,6 +8,7 @@ mod error;
 mod matcher;
 
 #[cfg(feature = "walk")]
+#[cfg_attr(docsrs, doc(cfg(feature = "walk")))]
 mod walk;
 
 pub use error::LiterateError;

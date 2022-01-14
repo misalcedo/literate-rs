@@ -2,6 +2,7 @@ use std::ffi::OsStr;
 use std::path::Path;
 
 /// Determines whether a file will be included in the directory tree walking extraction or not.
+#[cfg_attr(docsrs, doc(cfg(feature = "walk")))]
 pub trait FileFilter {
     /// Tests whether this file should be included in the list of files to extract.
     fn filter_file(&self, file: impl AsRef<Path>) -> bool;
