@@ -22,10 +22,10 @@ jobs:
         uses: Swatinem/rust-cache@v1.3.0
       - name: Build Docs
         uses: actions-rs/cargo@v1
-        with:
-          command: doc
-          env:
+        env:
             RUSTDOCFLAGS: "--cfg docsrs"
+        with:
+          command: doc          
           args: --verbose --all-features
       - name: Validate Links
         uses: reiddraper/freshlinks@v0.1.1
