@@ -12,6 +12,12 @@ impl<Matcher: CodeMatcher + ?Sized> CodeMatcher for Box<Matcher> {
     }
 }
 
+impl<Matcher: CodeMatcher + ?Sized> CodeMatcher for &Matcher {
+    fn matches(&self, language: Option<&str>) -> bool {
+        (*self).matches(language)
+    }
+}
+
 impl CodeMatcher for bool {
     fn matches(&self, _: Option<&str>) -> bool {
         *self
