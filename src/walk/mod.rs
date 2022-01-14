@@ -12,6 +12,7 @@ use walkdir::{DirEntry, WalkDir};
 /// The resulting content is written to the mapped filename.
 ///
 /// Returns the number of extracted files.
+#[cfg_attr(docsrs, doc(cfg(feature = "walk")))]
 pub fn walk_extract<Input, Filter, Matcher, Mapper>(
     input: Input,
     filter: Filter,

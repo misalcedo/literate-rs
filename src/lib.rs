@@ -8,6 +8,7 @@ mod error;
 mod matcher;
 
 #[cfg(feature = "walk")]
+#[cfg_attr(docsrs, doc(cfg(feature = "walk")))]
 mod walk;
 
 pub use error::LiterateError;
