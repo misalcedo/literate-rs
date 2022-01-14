@@ -1,0 +1,584 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/pulldown-cmark-0.9.0/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../pulldown_cmark/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../pulldown_cmark/index.html"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div>
+                                <input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright 2015 Google Inc. All rights reserved.</span>
+<span class="comment">//</span>
+<span class="comment">// Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="comment">// of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="comment">// in the Software without restriction, including without limitation the rights</span>
+<span class="comment">// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="comment">// copies of the Software, and to permit persons to whom the Software is</span>
+<span class="comment">// furnished to do so, subject to the following conditions:</span>
+<span class="comment">//</span>
+<span class="comment">// The above copyright notice and this permission notice shall be included in</span>
+<span class="comment">// all copies or substantial portions of the Software.</span>
+<span class="comment">//</span>
+<span class="comment">// THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="comment">// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="comment">// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="comment">// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="comment">// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="comment">// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span>
+<span class="comment">// THE SOFTWARE.</span>
+
+<span class="doccomment">//! Pull parser for [CommonMark](https://commonmark.org). This crate provides a [Parser](struct.Parser.html) struct</span>
+<span class="doccomment">//! which is an iterator over [Event](enum.Event.html)s. This iterator can be used</span>
+<span class="doccomment">//! directly, or to output HTML using the [HTML module](html/index.html).</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! By default, only CommonMark features are enabled. To use extensions like tables,</span>
+<span class="doccomment">//! footnotes or task lists, enable them by setting the corresponding flags in the</span>
+<span class="doccomment">//! [Options](struct.Options.html) struct.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Example</span>
+<span class="doccomment">//! ```rust</span>
+<span class="doccomment">//! use pulldown_cmark::{Parser, Options, html};</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! let markdown_input = &quot;Hello world, this is a ~~complicated~~ *very simple* example.&quot;;</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! // Set up options and parser. Strikethroughs are not part of the CommonMark standard</span>
+<span class="doccomment">//! // and we therefore must enable it explicitly.</span>
+<span class="doccomment">//! let mut options = Options::empty();</span>
+<span class="doccomment">//! options.insert(Options::ENABLE_STRIKETHROUGH);</span>
+<span class="doccomment">//! let parser = Parser::new_ext(markdown_input, options);</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! // Write to String buffer.</span>
+<span class="doccomment">//! let mut html_output = String::new();</span>
+<span class="doccomment">//! html::push_html(&amp;mut html_output, parser);</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! // Check that the output is what we expected.</span>
+<span class="doccomment">//! let expected_html = &quot;&lt;p&gt;Hello world, this is a &lt;del&gt;complicated&lt;/del&gt; &lt;em&gt;very simple&lt;/em&gt; example.&lt;/p&gt;\n&quot;;</span>
+<span class="doccomment">//! assert_eq!(expected_html, &amp;html_output);</span>
+<span class="doccomment">//! ```</span>
+
+<span class="comment">// When compiled for the rustc compiler itself we want to make sure that this is</span>
+<span class="comment">// an unstable crate.</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">rustbuild</span>, <span class="ident">feature</span>(<span class="ident">staged_api</span>, <span class="ident">rustc_private</span>))]</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">rustbuild</span>, <span class="ident">unstable</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rustc_private&quot;</span>, <span class="ident">issue</span> <span class="op">=</span> <span class="string">&quot;27812&quot;</span>))]</span>
+<span class="comment">// Forbid unsafe code unless the SIMD feature is enabled.</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;simd&quot;</span>), <span class="ident">forbid</span>(<span class="ident">unsafe_code</span>))]</span>
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">html</span>;
+
+<span class="kw">mod</span> <span class="ident">entities</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">escape</span>;
+<span class="kw">mod</span> <span class="ident">firstpass</span>;
+<span class="kw">mod</span> <span class="ident">linklabel</span>;
+<span class="kw">mod</span> <span class="ident">parse</span>;
+<span class="kw">mod</span> <span class="ident">puncttable</span>;
+<span class="kw">mod</span> <span class="ident">scanners</span>;
+<span class="kw">mod</span> <span class="ident">strings</span>;
+<span class="kw">mod</span> <span class="ident">tree</span>;
+
+<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">convert::TryFrom</span>, <span class="ident">fmt::Display</span>};
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::parse</span>::{<span class="ident">BrokenLink</span>, <span class="ident">BrokenLinkCallback</span>, <span class="ident">LinkDef</span>, <span class="ident">OffsetIter</span>, <span class="ident">Parser</span>, <span class="ident">RefDefs</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::strings</span>::{<span class="ident">CowStr</span>, <span class="ident">InlineStr</span>};
+
+<span class="doccomment">/// Codeblock kind.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CodeBlockKind</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">Indented</span>,
+    <span class="doccomment">/// The value contained in the tag describes the language of the code, which may be empty.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="ident">Fenced</span>(<span class="ident">CowStr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>),
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">CodeBlockKind</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_indented</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self</span>, <span class="ident">CodeBlockKind::Indented</span>)
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_fenced</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self</span>, <span class="ident">CodeBlockKind::Fenced</span>(<span class="kw">_</span>))
+    }
+}
+
+<span class="doccomment">/// Tags for elements that can contain other elements.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Tag</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// A paragraph of text and other inline elements.</span>
+    <span class="ident">Paragraph</span>,
+
+    <span class="doccomment">/// A heading. The first field indicates the level of the heading,</span>
+    <span class="doccomment">/// the second the fragment identifier, and the third the classes.</span>
+    <span class="ident">Heading</span>(<span class="ident">HeadingLevel</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>),
+
+    <span class="ident">BlockQuote</span>,
+    <span class="doccomment">/// A code block.</span>
+    <span class="ident">CodeBlock</span>(<span class="ident">CodeBlockKind</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>),
+
+    <span class="doccomment">/// A list. If the list is ordered the field indicates the number of the first item.</span>
+    <span class="doccomment">/// Contains only list items.</span>
+    <span class="ident">List</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>), <span class="comment">// TODO: add delim and tight for ast (not needed for html)</span>
+    <span class="doccomment">/// A list item.</span>
+    <span class="ident">Item</span>,
+    <span class="doccomment">/// A footnote definition. The value contained is the footnote&#39;s label by which it can</span>
+    <span class="doccomment">/// be referred to.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="ident">FootnoteDefinition</span>(<span class="ident">CowStr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>),
+
+    <span class="doccomment">/// A table. Contains a vector describing the text-alignment for each of its columns.</span>
+    <span class="ident">Table</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Alignment</span><span class="op">&gt;</span>),
+    <span class="doccomment">/// A table header. Contains only `TableRow`s. Note that the table body starts immediately</span>
+    <span class="doccomment">/// after the closure of the `TableHead` tag. There is no `TableBody` tag.</span>
+    <span class="ident">TableHead</span>,
+    <span class="doccomment">/// A table row. Is used both for header rows as body rows. Contains only `TableCell`s.</span>
+    <span class="ident">TableRow</span>,
+    <span class="ident">TableCell</span>,
+
+    <span class="comment">// span-level tags</span>
+    <span class="ident">Emphasis</span>,
+    <span class="ident">Strong</span>,
+    <span class="ident">Strikethrough</span>,
+
+    <span class="doccomment">/// A link. The first field is the link type, the second the destination URL and the third is a title.</span>
+    <span class="ident">Link</span>(<span class="ident">LinkType</span>, <span class="ident">CowStr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">CowStr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>),
+
+    <span class="doccomment">/// An image. The first field is the link type, the second the destination URL and the third is a title.</span>
+    <span class="ident">Image</span>(<span class="ident">LinkType</span>, <span class="ident">CowStr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">CowStr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>),
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Ord</span>, <span class="ident">PartialOrd</span>, <span class="ident">Hash</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">HeadingLevel</span> {
+    <span class="ident">H1</span> <span class="op">=</span> <span class="number">1</span>,
+    <span class="ident">H2</span>,
+    <span class="ident">H3</span>,
+    <span class="ident">H4</span>,
+    <span class="ident">H5</span>,
+    <span class="ident">H6</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">HeadingLevel</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::fmt::Result</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident"><span class="self">Self</span>::H1</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;h1&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::H2</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;h2&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::H3</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;h3&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::H4</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;h4&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::H5</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;h5&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::H6</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;h6&quot;</span>),
+        }
+    }
+}
+
+<span class="doccomment">/// Returned when trying to convert a `usize` into a `Heading` but it fails</span>
+<span class="doccomment">/// because the usize isn&#39;t a valid heading level</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Ord</span>, <span class="ident">PartialOrd</span>, <span class="ident">Hash</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">InvalidHeadingLevel</span>(<span class="ident">usize</span>);
+
+<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HeadingLevel</span> {
+    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">InvalidHeadingLevel</span>;
+
+    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">value</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="ident">value</span> {
+            <span class="number">1</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::H1</span>),
+            <span class="number">2</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::H2</span>),
+            <span class="number">3</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::H3</span>),
+            <span class="number">4</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::H4</span>),
+            <span class="number">5</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::H5</span>),
+            <span class="number">6</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::H6</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">InvalidHeadingLevel</span>(<span class="ident">value</span>)),
+        }
+    }
+}
+
+<span class="doccomment">/// Type specifier for inline links. See [the Tag::Link](enum.Tag.html#variant.Link) for more information.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Copy</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">LinkType</span> {
+    <span class="doccomment">/// Inline link like `[foo](bar)`</span>
+    <span class="ident">Inline</span>,
+    <span class="doccomment">/// Reference link like `[foo][bar]`</span>
+    <span class="ident">Reference</span>,
+    <span class="doccomment">/// Reference without destination in the document, but resolved by the broken_link_callback</span>
+    <span class="ident">ReferenceUnknown</span>,
+    <span class="doccomment">/// Collapsed link like `[foo][]`</span>
+    <span class="ident">Collapsed</span>,
+    <span class="doccomment">/// Collapsed link without destination in the document, but resolved by the broken_link_callback</span>
+    <span class="ident">CollapsedUnknown</span>,
+    <span class="doccomment">/// Shortcut link like `[foo]`</span>
+    <span class="ident">Shortcut</span>,
+    <span class="doccomment">/// Shortcut without destination in the document, but resolved by the broken_link_callback</span>
+    <span class="ident">ShortcutUnknown</span>,
+    <span class="doccomment">/// Autolink like `&lt;http://foo.bar/baz&gt;`</span>
+    <span class="ident">Autolink</span>,
+    <span class="doccomment">/// Email address in autolink like `&lt;john@example.org&gt;`</span>
+    <span class="ident">Email</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">LinkType</span> {
+    <span class="kw">fn</span> <span class="ident">to_unknown</span>(<span class="self">self</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">LinkType::Reference</span> =&gt; <span class="ident">LinkType::ReferenceUnknown</span>,
+            <span class="ident">LinkType::Collapsed</span> =&gt; <span class="ident">LinkType::CollapsedUnknown</span>,
+            <span class="ident">LinkType::Shortcut</span> =&gt; <span class="ident">LinkType::ShortcutUnknown</span>,
+            <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
+        }
+    }
+}
+
+<span class="doccomment">/// Markdown events that are generated in a preorder traversal of the document</span>
+<span class="doccomment">/// tree, with additional `End` events whenever all of an inner node&#39;s children</span>
+<span class="doccomment">/// have been visited.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Event</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Start of a tagged element. Events that are yielded after this event</span>
+    <span class="doccomment">/// and before its corresponding `End` event are inside this element.</span>
+    <span class="doccomment">/// Start and end events are guaranteed to be balanced.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="ident">Start</span>(<span class="ident">Tag</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>),
+    <span class="doccomment">/// End of a tagged element.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="ident">End</span>(<span class="ident">Tag</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>),
+    <span class="doccomment">/// A text node.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="ident">Text</span>(<span class="ident">CowStr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>),
+    <span class="doccomment">/// An inline code node.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="ident">Code</span>(<span class="ident">CowStr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>),
+    <span class="doccomment">/// An HTML node.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="ident">Html</span>(<span class="ident">CowStr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>),
+    <span class="doccomment">/// A reference to a footnote with given label, which may or may not be defined</span>
+    <span class="doccomment">/// by an event with a `Tag::FootnoteDefinition` tag. Definitions and references to them may</span>
+    <span class="doccomment">/// occur in any order.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="ident">FootnoteReference</span>(<span class="ident">CowStr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>),
+    <span class="doccomment">/// A soft line break.</span>
+    <span class="ident">SoftBreak</span>,
+    <span class="doccomment">/// A hard line break.</span>
+    <span class="ident">HardBreak</span>,
+    <span class="doccomment">/// A horizontal ruler.</span>
+    <span class="ident">Rule</span>,
+    <span class="doccomment">/// A task list marker, rendered as a checkbox in HTML. Contains a true when it is checked.</span>
+    <span class="ident">TaskListMarker</span>(<span class="ident">bool</span>),
+}
+
+<span class="doccomment">/// Table column text alignment.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Alignment</span> {
+    <span class="doccomment">/// Default text alignment.</span>
+    <span class="prelude-val">None</span>,
+    <span class="ident">Left</span>,
+    <span class="ident">Center</span>,
+    <span class="ident">Right</span>,
+}
+
+<span class="macro">bitflags::bitflags!</span> {
+    <span class="doccomment">/// Option struct containing flags for enabling extra features</span>
+    <span class="doccomment">/// that are not part of the CommonMark spec.</span>
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Options</span>: <span class="ident">u32</span> {
+        <span class="kw">const</span> <span class="ident">ENABLE_TABLES</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>;
+        <span class="kw">const</span> <span class="ident">ENABLE_FOOTNOTES</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">2</span>;
+        <span class="kw">const</span> <span class="ident">ENABLE_STRIKETHROUGH</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">3</span>;
+        <span class="kw">const</span> <span class="ident">ENABLE_TASKLISTS</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>;
+        <span class="kw">const</span> <span class="ident">ENABLE_SMART_PUNCTUATION</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>;
+        <span class="doccomment">/// Extension to allow headings to have ID and classes.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// `# text { #id .class1 .class2 }` is interpreted as a level 1 heading</span>
+        <span class="doccomment">/// with the content `text`, ID `id`, and classes `class1` and `class2`.</span>
+        <span class="doccomment">/// Note that attributes (ID and classes) should be space-separeted.</span>
+        <span class="kw">const</span> <span class="ident">ENABLE_HEADING_ATTRIBUTES</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">6</span>;
+    }
+}
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pulldown_cmark" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0-nightly (22e491ac7 2022-01-13)" ></div>
+</body></html>
