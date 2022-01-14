@@ -1,4 +1,4 @@
-use crate::arguments::Commands;
+use crate::arguments::{Commands, ExtractCommand, LanguageArguments, Verbosity, WalkCommand};
 use anyhow::Result;
 use arguments::Arguments;
 use literate::{CodeMatcher, LanguageMatcher};
@@ -9,20 +9,26 @@ use tracing::{info, subscriber::set_global_default, Level};
 mod arguments;
 
 fn main() -> Result<()> {
-    let arguments = Arguments::from_args();
+    let arguments = Arguments::parse_from_args();
 
-    set_verbosity(arguments.verbose)?;
+    set_verbosity(arguments.verbosity)?;
     run_subcommand(arguments)
 }
 
-fn set_verbosity(occurrences: usize) -> Result<()> {
-    let level = match occurrences {
+fn set_verbosity(verbosity: Verbosity) -> Result<()> {
+    let mut level = match verbosity.verbose {
         0 => Level::ERROR,
         1 => Level::WARN,
         2 => Level::INFO,
         3 => Level::DEBUG,
         _ => Level::TRACE,
     };
+
+    if verbosity.trace {
+        level = Level::TRACE;
+    } else if verbosity.debug {
+        level = Level::DEBUG;
+    }
 
     let collector = tracing_subscriber::fmt().with_max_level(level).finish();
 
@@ -31,50 +37,58 @@ fn set_verbosity(occurrences: usize) -> Result<()> {
 
 fn run_subcommand(arguments: Arguments) -> Result<()> {
     match arguments.command {
-        None => {
-            let matcher: Box<dyn CodeMatcher> = match arguments.language {
-                Some(language) => Box::new(LanguageMatcher::new(language, arguments.required)),
-                _ => Box::new(!arguments.required),
-            };
+        None => run_extraction(arguments.extract),
+        Some(Commands::Walk(command)) => run_walk(command),
+    }
+}
 
-            let input: Box<dyn Read> = match arguments.input {
-                None => Box::new(stdin()),
-                Some(path) => Box::new(File::open(path)?),
-            };
+fn run_extraction(arguments: ExtractCommand) -> Result<()> {
+    let input: Box<dyn Read> = match arguments.input {
+        None => Box::new(stdin()),
+        Some(path) => Box::new(File::open(path)?),
+    };
 
-            let output: Box<dyn Write> = match arguments.output {
-                None => Box::new(stdout()),
-                Some(path) => Box::new(
-                    File::options()
-                        .write(true)
-                        .create(true)
-                        .truncate(true)
-                        .create_new(!arguments.overwrite)
-                        .open(path)?,
-                ),
-            };
+    let output: Box<dyn Write> = match arguments.output {
+        None => Box::new(stdout()),
+        Some(path) => Box::new(
+            File::options()
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .create_new(!arguments.force)
+                .open(path)?,
+        ),
+    };
 
-            literate::extract(input, output, matcher)?;
+    let matcher: Box<dyn CodeMatcher> = arguments.matcher.into();
+    let bytes = literate::extract(input, output, matcher)?;
 
-            Ok(())
-        }
-        Some(Commands::Walk(command)) => {
-            let matcher: Box<dyn CodeMatcher> = match command.language {
-                Some(language) => Box::new(LanguageMatcher::new(language, command.required)),
-                _ => Box::new(!command.required),
-            };
+    info!("Extracted {bytes} bytes into the output directory.");
 
-            let files = literate::walk_extract(
-                command.input.canonicalize()?,
-                command.extension.as_str(),
-                command.output,
-                matcher,
-                command.overwrite,
-            )?;
+    Ok(())
+}
 
-            info!("Extracted {files} into the output directory.");
+fn run_walk(command: WalkCommand) -> Result<()> {
+    let matcher: Box<dyn CodeMatcher> = command.matcher.into();
 
-            Ok(())
+    let files = literate::walk_extract(
+        command.input.canonicalize()?,
+        command.extension.as_str(),
+        command.output,
+        matcher,
+        command.force,
+    )?;
+
+    info!("Extracted {files} files into the output directory.");
+
+    Ok(())
+}
+
+impl From<LanguageArguments> for Box<dyn CodeMatcher> {
+    fn from(arguments: LanguageArguments) -> Self {
+        match arguments.language {
+            Some(language) => Box::new(LanguageMatcher::new(language, arguments.required)),
+            _ => Box::new(!arguments.required),
         }
     }
 }
