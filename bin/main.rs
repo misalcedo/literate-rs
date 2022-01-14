@@ -71,7 +71,7 @@ fn run_extraction(arguments: ExtractCommand) -> Result<()> {
 fn run_walk(command: WalkCommand) -> Result<()> {
     let matcher: Box<dyn CodeMatcher> = command.matcher.into();
 
-    let files = literate::walk_extract(
+    let files = literate::walk::extract(
         command.input.canonicalize()?,
         command.extension.as_str(),
         command.output,

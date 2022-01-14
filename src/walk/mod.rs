@@ -1,7 +1,7 @@
 mod filter;
 mod mapper;
 
-use crate::{extract, CodeMatcher, LiterateError};
+use crate::{CodeMatcher, LiterateError};
 pub use filter::FileFilter;
 pub use mapper::PathMapper;
 use std::fs::{create_dir_all, File};
@@ -13,7 +13,7 @@ use walkdir::{DirEntry, WalkDir};
 ///
 /// Returns the number of extracted files.
 #[cfg_attr(docsrs, doc(cfg(feature = "walk")))]
-pub fn walk_extract<Input, Filter, Matcher, Mapper>(
+pub fn extract<Input, Filter, Matcher, Mapper>(
     input: Input,
     filter: Filter,
     mapper: Mapper,
@@ -54,7 +54,7 @@ where
             .create_new(!overwrite)
             .open(path)?;
 
-        extract(input, output, &matcher)?;
+        crate::extract(input, output, &matcher)?;
 
         files += 1;
     }

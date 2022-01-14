@@ -9,12 +9,10 @@ mod matcher;
 
 #[cfg(feature = "walk")]
 #[cfg_attr(docsrs, doc(cfg(feature = "walk")))]
-mod walk;
+pub mod walk;
 
 pub use error::LiterateError;
 pub use matcher::{CodeMatcher, LanguageMatcher};
-#[cfg(feature = "walk")]
-pub use walk::{walk_extract, FileFilter, PathMapper};
 
 const MINIMUM_CAPACITY: usize = 1024;
 
