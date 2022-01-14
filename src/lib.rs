@@ -5,8 +5,13 @@ use tracing::trace;
 mod error;
 mod matcher;
 
+#[cfg(feature = "walk")]
+mod walk;
+
 pub use error::LiterateError;
 pub use matcher::{CodeMatcher, LanguageMatcher};
+#[cfg(feature = "walk")]
+pub use walk::{walk_extract, FileFilter, PathMapper};
 
 const MINIMUM_CAPACITY: usize = 1024;
 
@@ -14,11 +19,18 @@ const MINIMUM_CAPACITY: usize = 1024;
 /// If the matcher returns [`true`] for the language, the contents of the code block are written to the output.
 /// Otherwise, the contents are ignored.
 /// If the language of the fenced code block is blank (empty or blank space), the matcher will get [`None`] as the language.
-pub fn extract<Input: Read, Output: Write, Matcher: CodeMatcher>(
+///
+/// Returns the number of extracted bytes.
+pub fn extract<Input, Output, Matcher>(
     input: Input,
     mut output: Output,
     matcher: Matcher,
-) -> Result<usize, LiterateError> {
+) -> Result<usize, LiterateError>
+where
+    Input: Read,
+    Output: Write,
+    Matcher: CodeMatcher,
+{
     let mut buffer = BufReader::new(input);
     let mut contents = String::with_capacity(MINIMUM_CAPACITY);
 

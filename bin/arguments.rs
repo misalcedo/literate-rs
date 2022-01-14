@@ -42,7 +42,28 @@ impl Arguments {
 
 #[derive(Debug, Parser)]
 /// Walks a directory tree, extracting each matching file found during the walk and outputting the contents to the output directory with the `.md` extension removed.
-pub struct WalkCommand {}
+pub struct WalkCommand {
+    /// The input directory to read Markdown from. Defaults to the current directory.
+    #[clap(short, long, default_value = ".")]
+    pub input: PathBuf,
+    /// The output directory to write matching fenced code block contents to.
+    /// The directory path to the file must already exist.
+    #[clap(short, long)]
+    pub output: PathBuf,
+    /// Overwrite any existing files in the output directory.
+    #[clap(long)]
+    pub overwrite: bool,
+    /// The file extension used to filter the files during the walk.
+    /// Only files matching `.<EXTENSION>.md` will be extracted to the output directory.
+    #[clap(short, long)]
+    pub extension: String,
+    #[clap(short, long)]
+    /// The language that the fenced code blocks must match to be included in the output.
+    pub language: Option<String>,
+    #[clap(short, long, requires("language"))]
+    /// Require fenced code blocks have a language to be included in the output.
+    pub required: bool,
+}
 
 #[derive(Debug, Subcommand)]
 #[clap()]
