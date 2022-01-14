@@ -1,0 +1,37 @@
+name: Publish Docs
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    name: Publish Docs to Github Pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v1.3.0
+      - name: Build Docs
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          env:
+            RUSTDOCFLAGS: "--cfg docsrs"
+          args: --verbose --all-features
+      - name: Validate Links
+        uses: reiddraper/freshlinks@v0.1.1
+        with:
+          glob: "target/docs/**/*.html"
+      - uses: JamesIves/github-pages-deploy-action@4.1.8
+        with:
+          branch: gh-pages
+          folder: target/docs
