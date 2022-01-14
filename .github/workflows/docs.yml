@@ -27,10 +27,6 @@ jobs:
         with:
           command: doc          
           args: --verbose --all-features
-      - name: Validate Links
-        uses: reiddraper/freshlinks@v0.1.1
-        with:
-          glob: "target/doc/**/*.html"
       - uses: JamesIves/github-pages-deploy-action@4.1.8
         with:
           branch: gh-pages
