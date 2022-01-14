@@ -1,9 +1,8 @@
 name: Docker
 
 on:
-  push:
-    tags:
-      - v*
+  release:
+    types: [created, published]
   workflow_dispatch: {}
 
 jobs:
