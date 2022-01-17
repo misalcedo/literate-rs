@@ -1,8 +1,9 @@
 use crate::arguments::{Commands, ExtractCommand, LanguageArguments, Verbosity, WalkCommand};
 use anyhow::Result;
 use arguments::Arguments;
-use literate::{CodeMatcher, LanguageMatcher};
+use literate::{CodeMatcher, LanguageMatcher, LiterateError};
 use std::fs::File;
+use std::io::ErrorKind::BrokenPipe;
 use std::io::{stdin, stdout, Read, Write};
 use tracing::{info, subscriber::set_global_default, Level};
 
@@ -61,11 +62,11 @@ fn run_extraction(arguments: ExtractCommand) -> Result<()> {
     };
 
     let matcher: Box<dyn CodeMatcher> = arguments.matcher.into();
-    let bytes = literate::extract(input, output, matcher)?;
-
-    info!("Extracted {bytes} bytes into the output directory.");
-
-    Ok(())
+    match literate::extract(input, output, matcher) {
+        Ok(bytes) => Ok(info!("Extracted {bytes} bytes into the output directory.")),
+        Err(LiterateError::IO(error)) if error.kind() == BrokenPipe => Ok(()),
+        Err(error) => Ok(eprintln!("{error}")),
+    }
 }
 
 fn run_walk(command: WalkCommand) -> Result<()> {
