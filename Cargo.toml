@@ -29,7 +29,7 @@ walk =["walkdir"]
 
 [dependencies]
 anyhow = { version = "1.0", optional = true }
-clap = { version = "3.0", features = ["derive"], optional = true }
+clap = { version = "4.2", features = ["derive"], optional = true }
 pulldown-cmark = "0.9"
 regex = "1.5"
 thiserror = "1.0"
