@@ -1,6 +1,6 @@
 use clap::{Args, Parser, Subcommand, ValueEnum};
-use std::path::PathBuf;
 use regex::Regex;
+use std::path::PathBuf;
 
 #[derive(Clone, Debug, Parser)]
 #[clap(author, version, about)]

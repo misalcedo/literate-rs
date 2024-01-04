@@ -1,6 +1,6 @@
-use std::fmt::{Display, Formatter};
 use pulldown_cmark::HeadingLevel;
 use regex::Regex;
+use std::fmt::{Display, Formatter};
 
 /// Determines whether a heading should be included in the output.
 pub trait HeadingMatcher {
@@ -58,7 +58,7 @@ impl HeadingMatcher for Option<&str> {
     fn matches(&self, _: HeadingLevel, contents: Option<&str>) -> bool {
         match self {
             None => true,
-            _ => *self == contents
+            _ => *self == contents,
         }
     }
 }
@@ -75,12 +75,12 @@ impl Display for PatternMatcher {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self.level.as_ref() {
             None => f.write_str("h*"),
-            Some(level) => level.fmt(f)
+            Some(level) => level.fmt(f),
         }?;
 
         match self.pattern.as_ref() {
             None => f.write_str(" *"),
-            Some(pattern) => write!(f, " {}", pattern)
+            Some(pattern) => write!(f, " {}", pattern),
         }
     }
 }
@@ -94,6 +94,7 @@ impl PatternMatcher {
 
 impl HeadingMatcher for PatternMatcher {
     fn matches(&self, level: HeadingLevel, contents: Option<&str>) -> bool {
-        HeadingMatcher::matches(&self.level, level, contents) && HeadingMatcher::matches(&self.pattern, level, contents)
+        HeadingMatcher::matches(&self.level, level, contents)
+            && HeadingMatcher::matches(&self.pattern, level, contents)
     }
 }

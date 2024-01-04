@@ -13,8 +13,8 @@ mod heading;
 pub mod walk;
 
 pub use code::{CodeMatcher, LanguageMatcher};
-pub use heading::{HeadingMatcher, PatternMatcher};
 pub use error::LiterateError;
+pub use heading::{HeadingMatcher, PatternMatcher};
 
 const MINIMUM_CAPACITY: usize = 1024;
 
@@ -58,7 +58,7 @@ where
             Event::End(Tag::CodeBlock(CodeBlockKind::Fenced(_))) => {
                 printing = false;
             }
-            _ => {},
+            _ => {}
         }
     }
 
@@ -71,7 +71,7 @@ where
 enum QuoteState<'a> {
     Candidate(HeadingLevel, &'a str),
     Printing(HeadingLevel, &'a str),
-    Searching
+    Searching,
 }
 
 /// Extracts fenced code blocks from the input.
@@ -85,10 +85,10 @@ pub fn quote<Input, Output, Matcher>(
     mut output: Output,
     matcher: Matcher,
 ) -> Result<usize, LiterateError>
-    where
-        Input: Read,
-        Output: Write,
-        Matcher: HeadingMatcher,
+where
+    Input: Read,
+    Output: Write,
+    Matcher: HeadingMatcher,
 {
     let mut buffer = BufReader::new(input);
     let mut contents = String::with_capacity(MINIMUM_CAPACITY);
@@ -101,7 +101,11 @@ pub fn quote<Input, Output, Matcher>(
     let mut bytes = 0;
 
     for (event, range) in parser.into_offset_iter() {
-        trace!("Received event: {:?} for excerpt: {:?}", event, &contents[range.clone()]);
+        trace!(
+            "Received event: {:?} for excerpt: {:?}",
+            event,
+            &contents[range.clone()]
+        );
 
         match (state, event) {
             (QuoteState::Searching, Event::Start(Tag::Heading(level, ..))) => {

@@ -37,10 +37,9 @@ impl Display for LiterateError {
             LiterateError::IO(e) => e.fmt(f),
             LiterateError::Walk(e) => e.fmt(f),
             LiterateError::Prefix(e) => e.fmt(f),
-            LiterateError::Unknown => write!(f ,"Unknown error")
+            LiterateError::Unknown => write!(f, "Unknown error"),
         }
     }
 }
 
-impl Error for LiterateError {
-}
+impl Error for LiterateError {}

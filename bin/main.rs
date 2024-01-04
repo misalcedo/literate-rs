@@ -1,4 +1,7 @@
-use crate::arguments::{Commands, ExtractCommand, HeadingArguments, LanguageArguments, QuoteCommand, Verbosity, WalkCommand};
+use crate::arguments::{
+    Commands, ExtractCommand, HeadingArguments, LanguageArguments, QuoteCommand, Verbosity,
+    WalkCommand,
+};
 use anyhow::Result;
 use arguments::Arguments;
 use literate::{CodeMatcher, HeadingMatcher, LanguageMatcher, LiterateError, PatternMatcher};
@@ -114,7 +117,10 @@ fn run_walk(command: WalkCommand) -> Result<()> {
 
 impl From<HeadingArguments> for Box<dyn HeadingMatcher> {
     fn from(arguments: HeadingArguments) -> Self {
-        Box::new(PatternMatcher::new(arguments.level.map(pulldown_cmark::HeadingLevel::from), arguments.pattern))
+        Box::new(PatternMatcher::new(
+            arguments.level.map(pulldown_cmark::HeadingLevel::from),
+            arguments.pattern,
+        ))
     }
 }
 
