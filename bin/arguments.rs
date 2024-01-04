@@ -1,13 +1,9 @@
-use clap::{AppSettings, Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 use std::path::PathBuf;
 
 #[derive(Clone, Debug, Eq, Parser, PartialEq)]
 #[clap(author, version, about)]
-#[clap(global_setting(AppSettings::PropagateVersion))]
-#[clap(global_setting(AppSettings::InferLongArgs))]
-#[clap(global_setting(AppSettings::InferSubcommands))]
-#[clap(global_setting(AppSettings::ArgsNegateSubcommands))]
-#[clap(global_setting(AppSettings::UseLongFormatForHelpSubcommand))]
+#[clap(args_conflicts_with_subcommands = true, infer_subcommands = true)]
 pub struct Arguments {
     #[clap(subcommand)]
     pub command: Option<Commands>,
@@ -30,17 +26,16 @@ pub struct Verbosity {
     #[clap(
         short,
         long,
-        global(true),
+        action = clap::ArgAction::Count,
         help_heading("VERBOSITY"),
-        conflicts_with_all(&["debug", "trace"]),
-        parse(from_occurrences)
+        conflicts_with_all(&["debug", "trace"])
     )]
     /// Make the program more talkative.
-    pub verbose: usize,
-    #[clap(short, long, global(true), help_heading("VERBOSITY"), conflicts_with_all(&["verbose", "trace"]))]
+    pub verbose: u8,
+    #[clap(short, long, help_heading("VERBOSITY"), conflicts_with_all(&["verbose", "trace"]))]
     /// Print debug messages.
     pub debug: bool,
-    #[clap(short, long, global(true), help_heading("VERBOSITY"), conflicts_with_all(&["verbose", "debug"]))]
+    #[clap(short, long, help_heading("VERBOSITY"), conflicts_with_all(&["verbose", "debug"]))]
     /// Print trace messages.
     pub trace: bool,
 }
