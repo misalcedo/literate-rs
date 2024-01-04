@@ -1,7 +1,7 @@
-use crate::arguments::{Commands, ExtractCommand, LanguageArguments, Verbosity, WalkCommand};
+use crate::arguments::{Commands, ExtractCommand, HeadingArguments, LanguageArguments, QuoteCommand, Verbosity, WalkCommand};
 use anyhow::Result;
 use arguments::Arguments;
-use literate::{CodeMatcher, LanguageMatcher, LiterateError};
+use literate::{CodeMatcher, HeadingMatcher, LanguageMatcher, LiterateError, PatternMatcher};
 use std::fs::File;
 use std::io::ErrorKind::BrokenPipe;
 use std::io::{stdin, stdout, Read, Write};
@@ -39,6 +39,7 @@ fn set_verbosity(verbosity: Verbosity) -> Result<()> {
 fn run_subcommand(arguments: Arguments) -> Result<()> {
     match arguments.command {
         None => run_extraction(arguments.extract),
+        Some(Commands::Quote(command)) => run_quote(command),
         Some(Commands::Walk(command)) => run_walk(command),
     }
 }
@@ -69,6 +70,32 @@ fn run_extraction(arguments: ExtractCommand) -> Result<()> {
     }
 }
 
+fn run_quote(arguments: QuoteCommand) -> Result<()> {
+    let input: Box<dyn Read> = match arguments.input {
+        None => Box::new(stdin()),
+        Some(path) => Box::new(File::open(path)?),
+    };
+
+    let output: Box<dyn Write> = match arguments.output {
+        None => Box::new(stdout()),
+        Some(path) => Box::new(
+            File::options()
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .create_new(!arguments.force)
+                .open(path)?,
+        ),
+    };
+
+    let matcher: Box<dyn HeadingMatcher> = arguments.matcher.into();
+    match literate::quote(input, output, matcher) {
+        Ok(bytes) => Ok(info!("Extracted {bytes} bytes into the output directory.")),
+        Err(LiterateError::IO(error)) if error.kind() == BrokenPipe => Ok(()),
+        Err(error) => Ok(eprintln!("{error}")),
+    }
+}
+
 fn run_walk(command: WalkCommand) -> Result<()> {
     let matcher: Box<dyn CodeMatcher> = command.matcher.into();
 
@@ -83,6 +110,12 @@ fn run_walk(command: WalkCommand) -> Result<()> {
     info!("Extracted {files} files into the output directory.");
 
     Ok(())
+}
+
+impl From<HeadingArguments> for Box<dyn HeadingMatcher> {
+    fn from(arguments: HeadingArguments) -> Self {
+        Box::new(PatternMatcher::new(arguments.level.map(pulldown_cmark::HeadingLevel::from), arguments.pattern))
+    }
 }
 
 impl From<LanguageArguments> for Box<dyn CodeMatcher> {

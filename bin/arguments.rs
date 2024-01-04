@@ -1,7 +1,8 @@
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use std::path::PathBuf;
+use regex::Regex;
 
-#[derive(Clone, Debug, Eq, Parser, PartialEq)]
+#[derive(Clone, Debug, Parser)]
 #[clap(author, version, about)]
 #[clap(args_conflicts_with_subcommands = true, infer_subcommands = true)]
 pub struct Arguments {
@@ -21,21 +22,22 @@ impl Arguments {
 }
 
 /// Set the logging verbosity or level.
-#[derive(Args, Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Args, Copy, Clone, Debug)]
 pub struct Verbosity {
     #[clap(
         short,
         long,
         action = clap::ArgAction::Count,
+        global = true,
         help_heading("VERBOSITY"),
         conflicts_with_all(&["debug", "trace"])
     )]
     /// Make the program more talkative.
     pub verbose: u8,
-    #[clap(short, long, help_heading("VERBOSITY"), conflicts_with_all(&["verbose", "trace"]))]
+    #[clap(short, long, global = true, help_heading("VERBOSITY"), conflicts_with_all(&["verbose", "trace"]))]
     /// Print debug messages.
     pub debug: bool,
-    #[clap(short, long, help_heading("VERBOSITY"), conflicts_with_all(&["verbose", "debug"]))]
+    #[clap(short, long, global = true, help_heading("VERBOSITY"), conflicts_with_all(&["verbose", "debug"]))]
     /// Print trace messages.
     pub trace: bool,
 }
@@ -49,6 +51,40 @@ pub struct LanguageArguments {
     #[clap(short, long, help_heading("LANGUAGE"), requires("language"))]
     /// Require fenced code blocks have a language to be included in the output.
     pub required: bool,
+}
+
+/// Defines which heading will be included in the output.
+#[derive(Args, Clone, Debug)]
+pub struct HeadingArguments {
+    #[clap(short, long, help_heading("HEADING"), value_enum)]
+    /// The level of the heading to quote.
+    pub level: Option<HeadingLevel>,
+    #[clap(short, long, help_heading("HEADING"))]
+    /// A regular expression to match the heading content with.
+    pub pattern: Option<Regex>,
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, ValueEnum)]
+pub enum HeadingLevel {
+    H1,
+    H2,
+    H3,
+    H4,
+    H5,
+    H6,
+}
+
+impl From<HeadingLevel> for pulldown_cmark::HeadingLevel {
+    fn from(level: HeadingLevel) -> Self {
+        match level {
+            HeadingLevel::H1 => pulldown_cmark::HeadingLevel::H1,
+            HeadingLevel::H2 => pulldown_cmark::HeadingLevel::H2,
+            HeadingLevel::H3 => pulldown_cmark::HeadingLevel::H3,
+            HeadingLevel::H4 => pulldown_cmark::HeadingLevel::H4,
+            HeadingLevel::H5 => pulldown_cmark::HeadingLevel::H5,
+            HeadingLevel::H6 => pulldown_cmark::HeadingLevel::H6,
+        }
+    }
 }
 
 /// The input and output stream arguments for extracting a single file.
@@ -66,6 +102,23 @@ pub struct ExtractCommand {
     pub force: bool,
     #[clap(flatten)]
     pub matcher: LanguageArguments,
+}
+
+/// The input and output stream arguments for extracting a section of markdown from a single file.
+#[derive(Args, Clone, Debug)]
+pub struct QuoteCommand {
+    /// The input stream to read Markdown from. Defaults to STDIN.
+    #[clap(short, long, help_heading("IO"))]
+    pub input: Option<PathBuf>,
+    /// The output stream to write matching fenced code block contents to. Defaults to STDOUT.
+    /// The directory path to the file must already exist.
+    #[clap(short, long, help_heading("IO"))]
+    pub output: Option<PathBuf>,
+    /// Overwrite the existing contents in the output stream.
+    #[clap(short, long, help_heading("IO"), requires("output"))]
+    pub force: bool,
+    #[clap(flatten)]
+    pub matcher: HeadingArguments,
 }
 
 #[derive(Clone, Debug, Eq, Parser, PartialEq)]
@@ -90,7 +143,8 @@ pub struct WalkCommand {
 }
 
 /// The sub-command to execute.
-#[derive(Clone, Debug, Eq, PartialEq, Subcommand)]
+#[derive(Clone, Debug, Subcommand)]
 pub enum Commands {
+    Quote(QuoteCommand),
     Walk(WalkCommand),
 }

@@ -65,7 +65,7 @@ impl Display for LanguageMatcher {
 impl LanguageMatcher {
     /// Creates a new [`LanguageMatcher`].
     pub fn new(language: String, required: bool) -> Self {
-        LanguageMatcher { language, required }
+        Self { language, required }
     }
 }
 

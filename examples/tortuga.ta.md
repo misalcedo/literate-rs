@@ -36,6 +36,8 @@ f((x, y)) = y - x
 ```
 
 ## Factorial
+Calculate the factorial of an integer recursively:
+
 ```
 factorial(n = 0) = 1
 factorial(n.0 > 0) = n * factorial(n - 1)
@@ -48,3 +50,6 @@ fibonacci(n) = [
     fibonacci(n - 2) + fibonacci(n - 1)
 ]
 ```
+
+##
+Empty heading
